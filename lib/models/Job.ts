@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IJob extends Document {
   title: string;
@@ -9,6 +9,7 @@ export interface IJob extends Document {
   type: string;
   contactEmail: string;
   contactPhone: string;
+  postedBy: Types.ObjectId;
   createdAt: Date;
 }
 
@@ -21,6 +22,7 @@ const JobSchema = new Schema<IJob>({
   type: { type: String, required: true },
   contactEmail: { type: String, required: false },
   contactPhone: { type: String, required: false },
+  postedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
 }, { timestamps: true });
 
 export default mongoose.models.Job || mongoose.model<IJob>("Job", JobSchema);

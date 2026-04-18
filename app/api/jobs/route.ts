@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
     const body = await request.json();
-    const job = await Job.create(body);
+    const job = await Job.create({ ...body, postedBy: session.userId });
     return NextResponse.json(job, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to create job" }, { status: 500 });

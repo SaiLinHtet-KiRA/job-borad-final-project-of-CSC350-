@@ -1,29 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-interface User {
-  userId: string;
-  email: string;
-  role: "employer" | "employee";
-  name: string;
-}
+import { useJobs } from "@/app/components/JobsProvider";
 
 export default function Navbar() {
-  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) => setUser(data.user || null));
-  }, []);
+  const { currentUser, refreshJobs } = useJobs();
+  const [loggingOut, setLoggingOut] = useState(false);
+  const user = currentUser;
 
   async function handleLogout() {
+    setLoggingOut(true);
     await fetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
+    await refreshJobs();
+    setLoggingOut(false);
     router.push("/");
     router.refresh();
   }
@@ -73,7 +65,8 @@ export default function Navbar() {
               </div>
               <button
                 onClick={handleLogout}
-                className="ml-1 p-2 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-all"
+                disabled={loggingOut}
+                className="ml-1 p-2 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-all disabled:opacity-50"
                 title="Logout"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useJobs } from "@/app/components/JobsProvider";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { refreshJobs } = useJobs();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,6 +35,7 @@ export default function LoginPage() {
     });
 
     if (res.ok) {
+      await refreshJobs();
       router.push("/");
       router.refresh();
     } else {

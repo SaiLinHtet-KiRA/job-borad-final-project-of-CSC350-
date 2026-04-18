@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useJobs } from "@/app/components/JobsProvider";
 
 export default function PostJobPage() {
   const router = useRouter();
+  const { refreshJobs } = useJobs();
   const [loading, setLoading] = useState(false);
   const [authorized, setAuthorized] = useState<boolean | null>(null);
 
@@ -74,6 +76,7 @@ export default function PostJobPage() {
     });
 
     if (res.ok) {
+      await refreshJobs();
       router.push("/");
     } else {
       alert("Failed to create job");
