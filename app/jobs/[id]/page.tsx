@@ -1,18 +1,26 @@
+"use client";
+
+import { useParams, notFound } from "next/navigation";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import dbConnect from "@/lib/mongodb";
-import Job from "@/lib/models/Job";
+import { useJobs } from "@/app/components/JobsProvider";
 
-export default async function JobDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  await dbConnect();
-  const job = await Job.findById(id).lean();
+export default function JobDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const { jobs, loading } = useJobs();
 
-  if (!job) notFound();
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const job = jobs.find((j) => j._id === id);
+
+  if (!job) {
+    notFound();
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">

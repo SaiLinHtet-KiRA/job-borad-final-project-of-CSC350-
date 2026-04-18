@@ -1,10 +1,18 @@
-import Link from "next/link";
-import dbConnect from "@/lib/mongodb";
-import Job from "@/lib/models/Job";
+"use client";
 
-export default async function HomePage() {
-  await dbConnect();
-  const jobs = await Job.find({}).sort({ createdAt: -1 }).lean();
+import Link from "next/link";
+import { useJobs } from "./components/JobsProvider";
+
+export default function HomePage() {
+  const { jobs, loading } = useJobs();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div>
