@@ -25,4 +25,4 @@ const JobSchema = new Schema<IJob>({
   postedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
 }, { timestamps: true });
 
-export default mongoose.models.Job || mongoose.model<IJob>("Job", JobSchema);
+export default (mongoose.models.Job as mongoose.Model<IJob>) || mongoose.model<IJob>("Job", JobSchema);

@@ -11,19 +11,20 @@ export async function GET(request: NextRequest) {
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const limit = Math.max(1, Math.min(100, parseInt(searchParams.get("limit") || "6", 10)));
 
-    const filter: Record<string, RegExp> = {};
-    if (search) {
-      filter.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { company: { $regex: search, $options: "i" } },
-        { location: { $regex: search, $options: "i" } },
-        { type: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ];
-    }
+    const orFilter = search
+      ? {
+          $or: [
+            { title: { $regex: search, $options: "i" } },
+            { company: { $regex: search, $options: "i" } },
+            { location: { $regex: search, $options: "i" } },
+            { type: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
 
-    const total = await Job.countDocuments(search ? { $or: filter.$or } : {});
-    const jobs = await Job.find(search ? { $or: filter.$or } : {})
+    const total = await Job.countDocuments(orFilter);
+    const jobs = await Job.find(orFilter)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
