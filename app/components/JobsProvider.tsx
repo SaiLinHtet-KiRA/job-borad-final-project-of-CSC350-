@@ -26,6 +26,12 @@ interface JobsContextValue {
   jobs: JobData[];
   loading: boolean;
   currentUser: UserData | null;
+  search: string;
+  setSearch: (search: string) => void;
+  page: number;
+  setPage: (page: number) => void;
+  totalPages: number;
+  total: number;
   refreshJobs: () => Promise<void>;
 }
 
@@ -33,6 +39,12 @@ const JobsContext = createContext<JobsContextValue>({
   jobs: [],
   loading: true,
   currentUser: null,
+  search: "",
+  setSearch: () => {},
+  page: 1,
+  setPage: () => {},
+  totalPages: 1,
+  total: 0,
   refreshJobs: async () => {},
 });
 
@@ -45,18 +57,31 @@ export default function JobsProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const refreshJobs = useCallback(async () => {
     try {
-      const res = await fetch("/api/jobs");
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (search) params.set("search", search);
+      params.set("page", String(page));
+      params.set("limit", "6");
+      const res = await fetch(`/api/jobs?${params.toString()}`);
       const data = await res.json();
-      setJobs(data);
+      setJobs(data.jobs);
+      setTotalPages(data.totalPages);
+      setTotal(data.total);
     } catch {
       setJobs([]);
+      setTotalPages(1);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [search, page]);
 
   if (!initialized) {
     setInitialized(true);
@@ -67,7 +92,20 @@ export default function JobsProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <JobsContext.Provider value={{ jobs, loading, currentUser, refreshJobs }}>
+    <JobsContext.Provider
+      value={{
+        jobs,
+        loading,
+        currentUser,
+        search,
+        setSearch,
+        page,
+        setPage,
+        totalPages,
+        total,
+        refreshJobs,
+      }}
+    >
       {children}
     </JobsContext.Provider>
   );
